@@ -60,3 +60,15 @@ after modified file, then add and check status and commit
 $ git add git_tips.txt
 $ git status
 $ git commit -m "changes once"
+
+go back to old version:
+版本控制系统肯定有某个命令可以告诉我们历史记录，在Git中，我们用git log命令查看：
+$ git log
+$ git log --pretty=oneline
+d056af6bc106051c108a3772fb761da723b7f9f2 (HEAD -> master) go back
+ac2d928dc2bfa01c743714a0717da0bfb5342f0d change once
+e40faa2b1a9fb88633a727aeb65ae7522f21c032 wrote a tips file
+在Git中，用HEAD表示当前版本,上一个版本就是HEAD^，
+上上一个版本就是HEAD^^，当然往上100个版本写100个^比较容易数不过来，所以写成HEAD~100。
+go back to "change once":
+$ git reset --hard HEAD^
