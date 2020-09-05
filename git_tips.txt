@@ -72,3 +72,23 @@ e40faa2b1a9fb88633a727aeb65ae7522f21c032 wrote a tips file
 上上一个版本就是HEAD^^，当然往上100个版本写100个^比较容易数不过来，所以写成HEAD~100。
 go back to "change once":
 $ git reset --hard HEAD^
+$ git log
+最新版本看不到了，指定回到未来的某个版本
+$ git reset --hard d056a
+版本号没必要写全，前几位就可以了，Git会自动去找。当然也不能只写前一两位，因为Git可能会找到多个版本号
+git reset --hard commit_id
+commit_id: $ git log :like d056af6bc106051c108a3772fb761da723b7f9f2
+
+找不到新版本的commit id怎么办？
+Git提供了一个命令git reflog用来记录你的每一次命令：
+$ git reflog
+
+工作区（Working Directory）
+工作区有一个隐藏目录.git，这个不算工作区，而是Git的版本库。
+版本库（repository）
+Git的版本库里存了很多东西，其中最重要的就是称为stage（或者叫index）的暂存区，
+还有Git为我们自动创建的第一个分支master，以及指向master的一个指针叫HEAD。
+把文件往Git版本库里添加的时候，是分两步执行的：
+第一步是用git add把文件添加进去，实际上就是把文件修改添加到暂存区；
+第二步是用git commit提交更改，实际上就是把暂存区的所有内容提交到当前分支。
+因为我们创建Git版本库时，Git自动为我们创建了唯一一个master分支，现在，git commit就是往master分支上提交更改。
