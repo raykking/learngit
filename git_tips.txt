@@ -37,3 +37,26 @@ $ pwd
 initialize repository:
 $ git init
 add file to repository:
+$ git add git_tipd.txt
+$ git commit -m "wrote a readme file"
+git commit命令，-m后面输入的是本次提交的说明，可以输入任意内容，
+当然最好是有意义的，这样你就能从历史记录里方便地找到改动记录。
+(commit可以一次提交很多文件，你可以多次add不同的文件，比如：
+$ git add file1.txt
+$ git add file2.txt file3.txt
+$ git commit -m "add 3 files.")
+
+
+modify files:
+see what status now
+$ git status
+git status命令可以让我们时刻掌握仓库当前的状态，
+上面的命令输出告诉我们，xx.txt被修改过了，但还没有准备提交的修改。
+$ git diff
+or
+$ git diff git_tipd.txt
+to see what changed
+after modified file, then add and check status and commit
+$ git add git_tips.txt
+$ git status
+$ git commit -m "changes once"
