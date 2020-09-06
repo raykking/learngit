@@ -1,4 +1,4 @@
-git 分布式版本控制
+git 分布式版本控制系统
 linux install git:
 $ git
 The program 'git' is currently not installed. You can install it by typing:
@@ -109,3 +109,214 @@ or
 用命令git reset HEAD <file>可以把暂存区的修改撤销掉（unstage）,重新放回工作区：
 git reset命令既可以回退版本，也可以把暂存区的修改回退到工作区。当我们用HEAD时，表示最新的版本。
 再用git status查看一下，现在暂存区是干净的，工作区有修改：
+
+
+delete file in repository:
+create a file in working Directory
+$ touch test.txt
+remove the file in Directory
+$ rm test.txt
+$ git status
+发现被删除了，一种情况是确实要删，so
+$ git rm test.txt
+then commit
+$ git commit -m "remove test.txt"
+现在，文件就从版本库中被删除了。
+从来没有被添加到版本库就被删除的文件，是无法恢复的！
+另一种情况是删错了，因为版本库里还有呢，所以可以很轻松地把误删的文件恢复到最新版本：
+在$ git rm test.txt之前
+$ git checkout -- test.txt
+一键还原
+
+
+
+SSH key:
+generate new key: step defaultly
+$ ssh-keygen -t rsa -C "raykking@hotmail.com"
+list all keys:
+$ ls -al ~/.ssh
+see:
+$ cat ~/.ssh/id_rsa.pub
+
+add public key to account ssh
+verify SSH link success or fail:
+$ ssh -T git@github.com
+
+link local repository to Github:
+$ git remote add origin git@github.com:raykking/learngit.git
+  git remote add origin git@github.com:raykking/learngit.git
+添加后，远程库的名字就是origin，这是Git默认的叫法，也可以改成别的，但是origin这个名字一看就知道是远程库。
+下一步，就可以把本地库的所有内容推送到远程库上：
+$ git push -u origin master
+  git push -u origin master
+由于远程库是空的，我们第一次推送master分支时，加上了-u参数，Git不但会把本地的master分支内容推送的远程新的master分支，
+还会把本地的master分支和远程的master分支关联起来，在以后的推送或者拉取时就可以简化命令。
+从现在起，只要本地作了提交，就可以通过命令：
+$ git push origin master
+  git push origin master
+把本地master分支的最新修改推送至GitHub，现在，你就拥有了真正的分布式版本库！
+
+
+clone repository form Github:
+$ cd path
+$ git clone git@github.com:raykking/MMEE_WLSM1.git
+$ rm -rf MMEE_WLSM1  #remove a Directory
+
+
+create a branch except for master:
+create and point to the branch
+$ git checkout -b dev
+or
+创建并切换到新的dev分支，可以使用：
+$ git switch -c dev
+git checkout命令加上-b参数表示创建并切换，相当于以下两条命令：
+$ git branch dev
+$ git checkout dev
+see current branch
+$ git branch
+now work in the current branch dev:
+$ touch readme.txt
+$ atom readme.txt
+$ git add readme.txt
+$ git commit -m "new branch"
+swith to master
+$ git checkout master
+or
+$ git switch master
+readme.txt is not in master
+merge dev to master
+$ git merge dev
+delete a branch:
+$ git branch -d dev
+
+当Git无法自动合并分支时，就必须首先解决冲突。解决冲突后，再提交，合并完成。
+解决冲突就是把Git合并失败的文件手动编辑为我们希望的内容，再提交。
+用git log --graph命令可以看到分支合并图。
+$ git log --graph --pretty=oneline --abbrev-commit
+
+合并分支时，加上--no-ff参数就可以用普通模式合并，
+合并后的历史有分支，能看出来曾经做过合并，
+而fast forward合并就看不出来曾经做过合并。
+$ git switch -c dev
+$ git add readme.txt
+$ git commit -m "add merge"
+$ git switch master
+准备合并dev分支，请注意--no-ff参数，表示禁用Fast forward：
+$ git merge --no-ff -m "merge with no-ff" dev
+因为本次合并要创建一个新的commit，所以加上-m参数，把commit描述写进去。
+合并后，我们用git log看看分支历史：
+$ git log --graph --pretty=oneline --abbrev-commit
+*   e1e9c68 (HEAD -> master) merge with no-ff
+|\
+| * f52c633 (dev) add merge
+|/
+*   cf810e4 conflict fixed
+...
+
+
+bug branches
+当你接到一个修复一个代号101的bug的任务时，很自然地，你想创建一个分支issue-101来修复它，
+但是，等等，当前正在dev上进行的工作还没有提交：
+并不是你不想提交，而是工作只进行到一半，还没法提交，预计完成还需1天时间。但是，必须在两个小时内修复该bug，怎么办？
+幸好，Git还提供了一个stash功能，可以把当前工作现场“储藏”起来，等以后恢复现场后继续工作：
+$ git stash
+$ git status
+now working tree clean
+现在，用git status查看工作区，就是干净的（除非有没有被Git管理的文件），因此可以放心地创建分支来修复bug。
+首先确定要在哪个分支上修复bug，假定需要在master分支上修复，就从master创建临时分支：
+$ git checkout master
+$ git checkout -b issue-101
+fix bug and then change to master, merge branch,delete isuee-101 branch
+$ git add ....txt
+$ git commit -m "..."
+$ git switch master
+$ git merge --no-ff -m "merge"
+$ git switch dev # return to working branch
+$ git status
+工作区是干净的，刚才的工作现场存到哪去了？用git stash list命令看看：
+$ git stash list
+工作现场还在，Git把stash内容存在某个地方了，但是需要恢复一下，有两个办法：
+一是用git stash apply恢复，但是恢复后，stash内容并不删除，你需要用git stash drop来删除；
+另一种方式是用git stash pop，恢复的同时把stash内容也删了：
+
+你可以多次stash，恢复的时候，先用git stash list查看，然后恢复指定的stash，用命令：
+$ git stash apply stash@{0}
+****在复制之前的bug修复到dev之前不要恢复dev的现场，复制修复的bug后再恢复到现场。
+################################
+在master分支上修复了bug后，我们要想一想，dev分支是早期从master分支分出来的，所以，
+这个bug其实在当前dev分支上也存在。
+那怎么在dev分支上修复同样的bug？重复操作一次，提交不就行了？
+有木有更简单的方法？
+有！
+同样的bug，要在dev上修复，我们只需要把4c805e2 fix bug 101 ($ git commit -m "fix bug 101")后得到的，
+这个提交所做的修改“复制”到dev分支。注意：我们只想复制4c805e2 fix bug 101这个提交所做的修改，
+并不是把整个master分支merge过来。
+为了方便操作，Git专门提供了一个cherry-pick命令，让我们能复制一个特定的提交到当前分支：
+本例：
+$ git commit -m "fix bug 101"
+[issue-101 a0281df] fix bug 101    //// commit number
+$ git branch
+git cherry-pick a0281df
+#################################
+
+
+
+feature add
+软件开发中，总有无穷无尽的新的功能要不断添加进来。
+添加一个新功能时，你肯定不希望因为一些实验性质的代码，把主分支搞乱了，所以，
+每添加一个新功能，最好新建一个feature分支，在上面开发，完成后，合并，最后，删除该feature分支。
+
+开发一个新feature，最好新建一个分支；
+如果要丢弃一个没有被合并过的分支，可以通过git branch -D <name>强行删除。
+销毁失败。Git友情提醒，feature-vulcan分支还没有被合并，如果删除，将丢失掉修改，如果要强行删除，需要使用大写的-D参数。。
+
+查看远程库的信息
+$ git remote -v
+推送分支，就是把该分支上的所有本地提交推送到远程库。推送时，要指定本地分支，这样，Git就会把该分支推送到远程库对应的远程分支上：
+$ git push origin master
+如果要推送其他分支，比如dev，就改成：
+$ git push origin dev
+
+多人协作时，大家都会往master和dev分支上推送各自的修改。
+现在，模拟一个你的小伙伴，可以在另一台电脑（注意要把SSH Key添加到GitHub）或者同一台电脑的另一个目录下克隆：
+
+因此，多人协作的工作模式通常是这样：
+
+首先，可以试图用git push origin <branch-name>推送自己的修改；
+如果推送失败，则因为远程分支比你的本地更新，需要先用git pull试图合并；
+如果合并有冲突，则解决冲突，并在本地提交；
+没有冲突或者解决掉冲突后，再用git push origin <branch-name>推送就能成功！
+如果git pull提示no tracking information，则说明本地分支和远程分支的链接关系没有创建，用命令git branch --set-upstream-to <branch-name> origin/<branch-name>。
+这就是多人协作的工作模式，一旦熟悉了，就非常简单。
+小结
+查看远程库信息，使用git remote -v；
+本地新建的分支如果不推送到远程，对其他人就是不可见的；
+从本地推送分支，使用git push origin branch-name，如果推送失败，先用git pull抓取远程的新提交；
+在本地创建和远程分支对应的分支，使用git checkout -b branch-name origin/branch-name，本地和远程分支的名称最好一致；
+建立本地分支和远程分支的关联，使用git branch --set-upstream branch-name origin/branch-name；
+从远程抓取分支，使用git pull，如果有冲突，要先处理冲突。
+
+
+$ git rebase
+$ git log --graph --pretty=oneline --abbrev-commit
+原本分叉的提交现在变成一条直线了！
+
+
+Tag
+tag就是一个让人容易记住的有意义的名字，它跟某个commit绑在一起。
+在Git中打标签非常简单，首先，切换到需要打标签的分支上：
+$ git branch
+* dev
+  master
+$ git checkout master
+$ git tag v1.0    // 定标签
+$ git tag  //查看所有标签,默认标签是打在最新提交的commit上的
+有时候，如果忘了打标签，比如，现在已经是周五了，但应该在周一打的标签没有打，怎么办？
+方法是找到历史提交的commit id，然后打上就可以了：
+$ git log --pretty=oneline --abbrev-commit
+$ git tag v0.9 f52c633(commit_id)
+注意，标签不是按时间顺序列出，而是按字母排序的。
+可以用git show <tagname>查看标签信息
+
+还可以创建带有说明的标签，用-a指定标签名，-m指定说明文字：
+$ git tag -a v0.1 -m "version 0.1 released" 1094adb
